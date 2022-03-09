@@ -1,7 +1,8 @@
-function [phi] = line_source(xcor,ycor,a,b,Vdot,L)
+function [psi,phi] = line_source(xcor,ycor,a,b,s)
 
     % Convert to cylindrical coordinates
-    [r,~] = rtheta(xcor,ycor,a,b);
+    [r,theta] = rtheta(xcor,ycor,a,b);
     
-    phi = Vdot/L/2/pi * log(r); 
+    phi = s/2/pi*log(r); 
+    psi = s/2/pi*theta;
 end

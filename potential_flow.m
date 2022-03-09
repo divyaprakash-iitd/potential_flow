@@ -2,73 +2,50 @@ clear; clc; close all;
 
 % Description: Plots the potential flows in a domain
 
-N = 100;
-xlim = [-1 1];
-ylim = [-1 1];
-X = linspace(xlim(1),xlim(2),N);
-Y = linspace(ylim(1),ylim(2),N);
-h = X(2)-X(1);
-[x,y] = meshgrid(X,Y);
+% Create a grid
+N       = 40;
+xlim    = [-1 1];
+ylim    = [-1 1];
+X       = linspace(xlim(1),xlim(2),N);
+Y       = linspace(ylim(1),ylim(2),N);
+h       = X(2)-X(1);
+[x,y]   = meshgrid(X,Y);
 
-% Location of a building block
-a = 0.5; % x-coordinate
-b = 0.5; % y-coordinate
-% Line source
-Vdot = 1;
-L = 1;
-phi1 = line_source(x,y,a,b,Vdot,L);
+% Strength
+s = 1;
 
-
+%% Line Source
 a = -0.5; % x-coordinate
 b = 0.5; % y-coordinate
-% Line vortex
-s = 0.5;
-phi2 = line_vortex(x,y,s,a,b);
+[~,phi] = line_source(x,y,a,b,s);
+[u1,v1] = velocity_field(phi,h,'potential');
 
-
-% Add doublet
-s = 1;
-rho = 0.2;
-a = 0; b = -0.5;
-phi3 = doublet(x,y,rho,s,a,b);
-
-% Add uniform flow
+%% Uniform Flow
 alpha = 0;
-V = 0;
-phi4 = uniform_flow(x,y,V,alpha);
+[psi,~] = uniform_flow(x,y,s,alpha);
+[u2,v2] = velocity_field(psi,h,'stream');
 
+%% Line vortex
+a = 0.5; % x-coordinate
+b = 0.5; % y-coordinate
+[psi,~] = line_vortex(x,y,a,b,s);
+[u3,v3] = velocity_field(psi,h,'stream');
 
-[u1,v1] = gradient(phi1,h);
-%[v2,u2] = gradient(phi2,h);
-[u2,v2] = gradient(phi2,h);
-[u3,v3] = gradient(phi3,h);
-[u4,v4] = gradient(phi4,h);
+%% Doublet
+a = 0; % x-coordinate
+b = -0.5; % y-coordinate
+r = 0.5;
+[psi,~] = doublet(x,y,a,b,s,r);
+[u4,v4] = velocity_field(psi,h,'stream');
 
+%% Superposition
 u = u1+u2+u3+u4;
-% v = v1-v2+v3+v4;
 v = v1+v2+v3+v4;
 
-
-
-%u = u2;
-%v = v2;
 umag = sqrt(u.^2+v.^2);
 un = u./umag;
 vn = v./umag;
 
-hold on
-colormap(jet)
-l = 0:0.01:0.7;
-%contourf(x,y,umag,l,'edgecolor','none')
-% contourf(x,y,umag,'edgecolor','none')
-quiver(x,y,un,vn,0.5,'k')
-% quiver(x,y,u,v,'k')
+quiver(x,y,un,vn,0.75,'r')
 axis equal
-
-th = linspace(0,2*pi,100);
-xc = a+rho*cos(th);
-yc = b+rho*sin(th);
-
-
-plot(xc,yc,'LineWidth',5)
 
